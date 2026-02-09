@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Image, Building2, FileText, Phone, MessageSquare,
-  LogOut, Menu, X, ChevronRight, Home
+  LogOut, Menu, X, ChevronRight, Home, PanelBottom
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import AdminHero from './AdminHero'
@@ -10,6 +10,7 @@ import AdminProperties from './AdminProperties'
 import AdminAbout from './AdminAbout'
 import AdminContact from './AdminContact'
 import AdminMessages from './AdminMessages'
+import AdminFooter from './AdminFooter'
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -48,6 +49,7 @@ export default function AdminDashboard() {
     { path: '/admin/dashboard/about', icon: <FileText size={20} />, label: 'About Page' },
     { path: '/admin/dashboard/contact', icon: <Phone size={20} />, label: 'Contact Info' },
     { path: '/admin/dashboard/messages', icon: <MessageSquare size={20} />, label: 'Messages' },
+    { path: '/admin/dashboard/footer', icon: <PanelBottom size={20} />, label: 'Footer' },
   ]
 
   if (loading) {
@@ -148,6 +150,7 @@ export default function AdminDashboard() {
             <Route path="about" element={<AdminAbout />} />
             <Route path="contact" element={<AdminContact />} />
             <Route path="messages" element={<AdminMessages />} />
+            <Route path="footer" element={<AdminFooter />} />
           </Routes>
         </div>
       </div>

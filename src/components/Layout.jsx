@@ -1,10 +1,23 @@
 import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X, MapPin, Phone, Mail } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [footer, setFooter] = useState({
+    description: 'Premier Dubai real estate brokerage with immersive Matterport 3D virtual tours.',
+    areas: ['Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'Business Bay', 'JBR'],
+    copyright: 'Golden Snow 360. All rights reserved.',
+    privacy_url: '',
+    terms_url: '',
+  })
+  const [contact, setContact] = useState({
+    address: 'Downtown Dubai, UAE',
+    phone: '+971 4 123 4567',
+    email: 'info@goldensnow360.com',
+  })
   const location = useLocation()
 
   useEffect(() => {
@@ -17,6 +30,38 @@ export default function Layout() {
     setMenuOpen(false)
     window.scrollTo(0, 0)
   }, [location])
+
+  useEffect(() => {
+    async function fetchFooter() {
+      try {
+        const [settingsRes, contactRes] = await Promise.all([
+          supabase.from('site_settings').select('*'),
+          supabase.from('contact_info').select('address, phone, email').eq('is_active', true).single()
+        ])
+
+        if (settingsRes.data) {
+          const map = {}
+          settingsRes.data.forEach(s => { map[s.key] = s.value })
+          setFooter(prev => ({
+            description: map.footer_description || prev.description,
+            areas: map.footer_areas ? map.footer_areas.split(',').map(a => a.trim()).filter(Boolean) : prev.areas,
+            copyright: map.footer_copyright || prev.copyright,
+            privacy_url: map.footer_privacy_url || '',
+            terms_url: map.footer_terms_url || '',
+          }))
+        }
+
+        if (contactRes.data) {
+          setContact({
+            address: contactRes.data.address || contact.address,
+            phone: contactRes.data.phone || contact.phone,
+            email: contactRes.data.email || contact.email,
+          })
+        }
+      } catch (e) { console.error(e) }
+    }
+    fetchFooter()
+  }, [])
 
   const navItems = [
     { to: '/', label: 'Home' },
@@ -115,7 +160,7 @@ export default function Layout() {
                 </div>
               </Link>
               <p className="text-white/60 text-sm leading-relaxed">
-                Premier Dubai real estate brokerage with immersive Matterport 3D virtual tours.
+                {footer.description}
               </p>
             </div>
 
@@ -133,7 +178,7 @@ export default function Layout() {
             <div>
               <h4 className="text-gold-400 font-semibold mb-4 text-sm tracking-wider">AREAS</h4>
               <div className="space-y-3">
-                {['Palm Jumeirah', 'Downtown Dubai', 'Dubai Marina', 'Business Bay', 'JBR'].map(area => (
+                {footer.areas.map(area => (
                   <Link key={area} to={`/vr-room?area=${encodeURIComponent(area)}`} className="block text-white/60 hover:text-gold-400 text-sm transition-colors">
                     {area}
                   </Link>
@@ -146,15 +191,15 @@ export default function Layout() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-white/60 text-sm">
                   <MapPin size={14} className="text-gold-400 flex-shrink-0" />
-                  Downtown Dubai, UAE
+                  {contact.address}
                 </div>
                 <div className="flex items-center gap-2 text-white/60 text-sm">
                   <Phone size={14} className="text-gold-400 flex-shrink-0" />
-                  +971 4 123 4567
+                  {contact.phone}
                 </div>
                 <div className="flex items-center gap-2 text-white/60 text-sm">
                   <Mail size={14} className="text-gold-400 flex-shrink-0" />
-                  info@goldensnow360.com
+                  {contact.email}
                 </div>
               </div>
             </div>
@@ -162,11 +207,11 @@ export default function Layout() {
 
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-white/40 text-sm">
-              &copy; {new Date().getFullYear()} Golden Snow 360. All rights reserved.
+              &copy; {new Date().getFullYear()} {footer.copyright}
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-white/40 hover:text-gold-400 text-sm transition-colors">Privacy Policy</a>
-              <a href="#" className="text-white/40 hover:text-gold-400 text-sm transition-colors">Terms of Service</a>
+              <a href={footer.privacy_url || '#'} className="text-white/40 hover:text-gold-400 text-sm transition-colors">Privacy Policy</a>
+              <a href={footer.terms_url || '#'} className="text-white/40 hover:text-gold-400 text-sm transition-colors">Terms of Service</a>
             </div>
           </div>
         </div>
