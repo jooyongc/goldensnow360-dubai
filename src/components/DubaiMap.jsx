@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { Link } from 'react-router-dom'
@@ -23,6 +23,25 @@ function MapBounds({ properties }) {
   return null
 }
 
+function HoverMarker({ children, ...props }) {
+  const markerRef = useRef(null)
+
+  useEffect(() => {
+    const marker = markerRef.current
+    if (!marker) return
+    const open = () => marker.openPopup()
+    const close = () => marker.closePopup()
+    marker.on('mouseover', open)
+    marker.on('mouseout', close)
+    return () => {
+      marker.off('mouseover', open)
+      marker.off('mouseout', close)
+    }
+  }, [])
+
+  return <Marker ref={markerRef} {...props}>{children}</Marker>
+}
+
 export default function DubaiMap({ properties, height = '500px' }) {
   const center = [25.2048, 55.2708]
 
@@ -39,7 +58,7 @@ export default function DubaiMap({ properties, height = '500px' }) {
       />
       <MapBounds properties={properties} />
       {properties.map(property => (
-        <Marker
+        <HoverMarker
           key={property.id}
           position={[property.lat, property.lng]}
           icon={goldIcon}
@@ -76,7 +95,7 @@ export default function DubaiMap({ properties, height = '500px' }) {
               </Link>
             </div>
           </Popup>
-        </Marker>
+        </HoverMarker>
       ))}
     </MapContainer>
   )
