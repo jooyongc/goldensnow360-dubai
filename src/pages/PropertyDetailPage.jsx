@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Bed, Bath, Maximize, MapPin, Building2, Share2, Phone } from 'lucide-react'
-import { supabase, DEMO_MODE, demoProperties } from '../lib/supabase'
+import { supabase, demoProperties } from '../lib/supabase'
 
 export default function PropertyDetailPage() {
   const { id } = useParams()
@@ -10,20 +10,23 @@ export default function PropertyDetailPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (DEMO_MODE) {
-        const found = demoProperties.find(p => String(p.id) === id)
-        setProperty(found || demoProperties[0])
-        setLoading(false)
-        return
-      }
       try {
         const { data } = await supabase
           .from('properties')
           .select('*')
           .eq('id', id)
           .single()
-        if (data) setProperty(data)
-      } catch (e) { console.error(e) }
+        if (data) {
+          setProperty(data)
+        } else {
+          const found = demoProperties.find(p => String(p.id) === id)
+          setProperty(found || null)
+        }
+      } catch (e) {
+        console.error(e)
+        const found = demoProperties.find(p => String(p.id) === id)
+        setProperty(found || null)
+      }
       setLoading(false)
     }
     fetchData()

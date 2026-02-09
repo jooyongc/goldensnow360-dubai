@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
-import { supabase, DEMO_MODE, demoContactInfo } from '../lib/supabase'
+import { supabase, demoContactInfo } from '../lib/supabase'
 
 export default function AdminContact() {
   const [contact, setContact] = useState({
@@ -21,7 +21,6 @@ export default function AdminContact() {
 
   useEffect(() => {
     async function fetch() {
-      if (DEMO_MODE) return
       try {
         const { data } = await supabase.from('contact_info').select('*').eq('is_active', true).single()
         if (data) setContact(data)
@@ -32,17 +31,15 @@ export default function AdminContact() {
 
   const handleSave = async () => {
     setSaving(true)
-    if (!DEMO_MODE) {
-      try {
-        if (contact.id) {
-          await supabase.from('contact_info').update({
-            ...contact, updated_at: new Date().toISOString()
-          }).eq('id', contact.id)
-        } else {
-          await supabase.from('contact_info').insert([contact])
-        }
-      } catch (e) { console.error(e) }
-    }
+    try {
+      if (contact.id) {
+        await supabase.from('contact_info').update({
+          ...contact, updated_at: new Date().toISOString()
+        }).eq('id', contact.id)
+      } else {
+        await supabase.from('contact_info').insert([contact])
+      }
+    } catch (e) { console.error(e) }
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)

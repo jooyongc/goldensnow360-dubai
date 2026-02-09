@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Instagram, Facebook, Linkedin, Youtube } from 'lucide-react'
-import { supabase, DEMO_MODE, demoContactInfo } from '../lib/supabase'
+import { supabase, demoContactInfo } from '../lib/supabase'
 
 export default function ContactPage() {
   const [searchParams] = useSearchParams()
@@ -19,7 +19,6 @@ export default function ContactPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (DEMO_MODE) { setLoading(false); return }
       try {
         const { data } = await supabase.from('contact_info').select('*').eq('is_active', true).single()
         if (data) {
@@ -42,11 +41,9 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
-    if (!DEMO_MODE && supabase) {
-      try {
-        await supabase.from('contact_submissions').insert([formData])
-      } catch (e) { console.error(e) }
-    }
+    try {
+      await supabase.from('contact_submissions').insert([formData])
+    } catch (e) { console.error(e) }
     setSubmitted(true)
     setSubmitting(false)
   }

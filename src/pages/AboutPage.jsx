@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Target, Eye, Award, Users } from 'lucide-react'
-import { supabase, DEMO_MODE, demoAboutContent } from '../lib/supabase'
+import { supabase, demoAboutContent } from '../lib/supabase'
 
 export default function AboutPage() {
   const [content, setContent] = useState(demoAboutContent)
@@ -9,7 +9,6 @@ export default function AboutPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (DEMO_MODE) { setLoading(false); return }
       try {
         const [aboutRes, statsRes] = await Promise.all([
           supabase.from('about_content').select('*').eq('is_active', true).single(),

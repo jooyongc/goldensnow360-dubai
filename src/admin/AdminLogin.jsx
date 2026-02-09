@@ -1,46 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock, User, Eye, EyeOff } from 'lucide-react'
-import { supabase, DEMO_MODE } from '../lib/supabase'
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export default function AdminLogin() {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate('/admin/dashboard')
+    })
+  }, [navigate])
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    if (DEMO_MODE) {
-      if (username === 'goldensnow360' && password === 'dubai360@!!') {
-        localStorage.setItem('admin_token', 'demo_admin_session')
-        localStorage.setItem('admin_user', JSON.stringify({ username, display_name: 'Admin' }))
-        navigate('/admin/dashboard')
-      } else {
-        setError('Invalid username or password')
-      }
-      setLoading(false)
-      return
-    }
-
     try {
-      const { data, error: dbError } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('username', username)
-        .eq('password_hash', password)
-        .single()
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
 
-      if (dbError || !data) {
-        setError('Invalid username or password')
-      } else {
-        localStorage.setItem('admin_token', data.id)
-        localStorage.setItem('admin_user', JSON.stringify(data))
+      if (authError) {
+        setError(authError.message)
+      } else if (data.session) {
         navigate('/admin/dashboard')
       }
     } catch (e) {
@@ -68,15 +58,15 @@ export default function AdminLogin() {
           )}
 
           <div className="mb-5">
-            <label className="block text-white/60 text-sm mb-2">Username</label>
+            <label className="block text-white/60 text-sm mb-2">Email</label>
             <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
               <input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="admin-input pl-12"
-                placeholder="Enter username"
+                placeholder="Enter email"
                 required
               />
             </div>

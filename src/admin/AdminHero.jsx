@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Save, Image } from 'lucide-react'
-import { supabase, DEMO_MODE, demoHeroContent } from '../lib/supabase'
+import { supabase, demoHeroContent } from '../lib/supabase'
 
 export default function AdminHero() {
   const [hero, setHero] = useState({
@@ -16,7 +16,6 @@ export default function AdminHero() {
 
   useEffect(() => {
     async function fetch() {
-      if (DEMO_MODE) return
       try {
         const { data } = await supabase.from('hero_sections').select('*').eq('page', 'home').single()
         if (data) setHero(data)
@@ -27,23 +26,21 @@ export default function AdminHero() {
 
   const handleSave = async () => {
     setSaving(true)
-    if (!DEMO_MODE) {
-      try {
-        if (hero.id) {
-          await supabase.from('hero_sections').update({
-            title: hero.title,
-            subtitle: hero.subtitle,
-            description: hero.description,
-            background_image: hero.background_image,
-            cta_text: hero.cta_text,
-            cta_link: hero.cta_link,
-            updated_at: new Date().toISOString()
-          }).eq('id', hero.id)
-        } else {
-          await supabase.from('hero_sections').insert([{ ...hero, page: 'home' }])
-        }
-      } catch (e) { console.error(e) }
-    }
+    try {
+      if (hero.id) {
+        await supabase.from('hero_sections').update({
+          title: hero.title,
+          subtitle: hero.subtitle,
+          description: hero.description,
+          background_image: hero.background_image,
+          cta_text: hero.cta_text,
+          cta_link: hero.cta_link,
+          updated_at: new Date().toISOString()
+        }).eq('id', hero.id)
+      } else {
+        await supabase.from('hero_sections').insert([{ ...hero, page: 'home' }])
+      }
+    } catch (e) { console.error(e) }
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)

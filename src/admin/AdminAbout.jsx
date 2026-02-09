@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
-import { supabase, DEMO_MODE, demoAboutContent } from '../lib/supabase'
+import { supabase, demoAboutContent } from '../lib/supabase'
 
 export default function AdminAbout() {
   const [content, setContent] = useState({
@@ -17,7 +17,6 @@ export default function AdminAbout() {
 
   useEffect(() => {
     async function fetch() {
-      if (DEMO_MODE) return
       try {
         const [aboutRes, statsRes] = await Promise.all([
           supabase.from('about_content').select('*').eq('is_active', true).single(),
@@ -32,19 +31,17 @@ export default function AdminAbout() {
 
   const handleSave = async () => {
     setSaving(true)
-    if (!DEMO_MODE) {
-      try {
-        if (content.id) {
-          await supabase.from('about_content').update({
-            title: content.title, subtitle: content.subtitle, description: content.description,
-            mission: content.mission, vision: content.vision, image: content.image,
-            updated_at: new Date().toISOString()
-          }).eq('id', content.id)
-        } else {
-          await supabase.from('about_content').insert([content])
-        }
-      } catch (e) { console.error(e) }
-    }
+    try {
+      if (content.id) {
+        await supabase.from('about_content').update({
+          title: content.title, subtitle: content.subtitle, description: content.description,
+          mission: content.mission, vision: content.vision, image: content.image,
+          updated_at: new Date().toISOString()
+        }).eq('id', content.id)
+      } else {
+        await supabase.from('about_content').insert([content])
+      }
+    } catch (e) { console.error(e) }
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)

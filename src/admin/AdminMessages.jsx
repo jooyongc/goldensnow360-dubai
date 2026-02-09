@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Mail, MailOpen, Trash2, Clock } from 'lucide-react'
-import { supabase, DEMO_MODE } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 export default function AdminMessages() {
   const [messages, setMessages] = useState([])
@@ -8,7 +8,6 @@ export default function AdminMessages() {
 
   useEffect(() => {
     async function fetch() {
-      if (DEMO_MODE) return
       try {
         const { data } = await supabase
           .from('contact_submissions')
@@ -22,7 +21,7 @@ export default function AdminMessages() {
 
   const markAsRead = async (msg) => {
     setSelected(msg)
-    if (!msg.is_read && !DEMO_MODE) {
+    if (!msg.is_read) {
       try {
         await supabase.from('contact_submissions').update({ is_read: true }).eq('id', msg.id)
         setMessages(messages.map(m => m.id === msg.id ? { ...m, is_read: true } : m))
@@ -32,11 +31,9 @@ export default function AdminMessages() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this message?')) return
-    if (!DEMO_MODE) {
-      try {
-        await supabase.from('contact_submissions').delete().eq('id', id)
-      } catch (e) { console.error(e) }
-    }
+    try {
+      await supabase.from('contact_submissions').delete().eq('id', id)
+    } catch (e) { console.error(e) }
     setMessages(messages.filter(m => m.id !== id))
     if (selected?.id === id) setSelected(null)
   }

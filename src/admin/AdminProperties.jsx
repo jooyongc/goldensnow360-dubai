@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Save, X, MapPin, ExternalLink } from 'lucide-react'
-import { supabase, DEMO_MODE, demoProperties } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 
 const emptyProperty = {
   title: '', title_ar: '', description: '', location: '', area: '',
@@ -16,7 +16,6 @@ export default function AdminProperties() {
 
   useEffect(() => {
     async function fetch() {
-      if (DEMO_MODE) { setProperties(demoProperties); return }
       try {
         const { data } = await supabase.from('properties').select('*').order('created_at', { ascending: false })
         if (data) setProperties(data)
@@ -36,17 +35,6 @@ export default function AdminProperties() {
   }
 
   const handleSave = async () => {
-    if (DEMO_MODE) {
-      if (isNew) {
-        const newProp = { ...editing, id: Date.now(), created_at: new Date().toISOString() }
-        setProperties([newProp, ...properties])
-      } else {
-        setProperties(properties.map(p => p.id === editing.id ? editing : p))
-      }
-      setEditing(null)
-      return
-    }
-
     try {
       if (isNew) {
         const { data } = await supabase.from('properties').insert([editing]).select().single()
@@ -63,10 +51,6 @@ export default function AdminProperties() {
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this property?')) return
-    if (DEMO_MODE) {
-      setProperties(properties.filter(p => p.id !== id))
-      return
-    }
     try {
       await supabase.from('properties').delete().eq('id', id)
       setProperties(properties.filter(p => p.id !== id))

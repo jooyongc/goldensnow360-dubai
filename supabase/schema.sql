@@ -118,10 +118,8 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Insert default admin user (password: dubai360@!!)
-INSERT INTO admin_users (username, password_hash, display_name, role)
-VALUES ('goldensnow360', 'dubai360@!!', 'Admin', 'superadmin')
-ON CONFLICT (username) DO NOTHING;
+-- Admin authentication is handled via Supabase Auth
+-- Admin user: bruno@goldensnow.ae (created in Supabase Auth dashboard)
 
 -- Insert default hero section
 INSERT INTO hero_sections (page, title, subtitle, description, background_image)

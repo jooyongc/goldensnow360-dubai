@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Image, Building2, FileText, Phone, MessageSquare,
-  Settings, LogOut, Menu, X, ChevronRight, Home
+  LogOut, Menu, X, ChevronRight, Home
 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import AdminHero from './AdminHero'
 import AdminProperties from './AdminProperties'
 import AdminAbout from './AdminAbout'
@@ -12,19 +13,31 @@ import AdminMessages from './AdminMessages'
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   const location = useLocation()
-  const adminUser = JSON.parse(localStorage.getItem('admin_user') || '{}')
 
   useEffect(() => {
-    if (!localStorage.getItem('admin_token')) {
-      navigate('/admin')
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/admin')
+      } else {
+        setUser(session.user)
+      }
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) navigate('/admin')
+      else setUser(session.user)
+    })
+
+    return () => subscription.unsubscribe()
   }, [navigate])
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token')
-    localStorage.removeItem('admin_user')
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
     navigate('/admin')
   }
 
@@ -36,6 +49,14 @@ export default function AdminDashboard() {
     { path: '/admin/dashboard/contact', icon: <Phone size={20} />, label: 'Contact Info' },
     { path: '/admin/dashboard/messages', icon: <MessageSquare size={20} />, label: 'Messages' },
   ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dubai-dark flex items-center justify-center">
+        <div className="text-gold-400">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-dubai-dark flex">
@@ -51,7 +72,9 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <div className="text-white font-semibold text-sm">Admin Panel</div>
-                <div className="text-gold-400 text-xs">{adminUser.display_name || 'Admin'}</div>
+                <div className="text-gold-400 text-xs truncate max-w-[140px]">
+                  {user?.email || 'Admin'}
+                </div>
               </div>
             </div>
             <button className="lg:hidden text-white/60" onClick={() => setSidebarOpen(false)}>
@@ -141,6 +164,24 @@ export default function AdminDashboard() {
 }
 
 function DashboardOverview() {
+  const [stats, setStats] = useState({ properties: 0, messages: 0 })
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [propRes, msgRes] = await Promise.all([
+          supabase.from('properties').select('id', { count: 'exact', head: true }),
+          supabase.from('contact_submissions').select('id', { count: 'exact', head: true })
+        ])
+        setStats({
+          properties: propRes.count || 0,
+          messages: msgRes.count || 0
+        })
+      } catch (e) { console.error(e) }
+    }
+    fetchStats()
+  }, [])
+
   return (
     <div>
       <h1 className="text-white font-display text-3xl font-bold mb-2">Dashboard</h1>
@@ -148,9 +189,9 @@ function DashboardOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { label: 'Properties', value: '5', icon: <Building2 size={24} />, color: 'text-blue-400' },
-          { label: 'VR Tours', value: '5', icon: <Image size={24} />, color: 'text-green-400' },
-          { label: 'Messages', value: '0', icon: <MessageSquare size={24} />, color: 'text-yellow-400' },
+          { label: 'Properties', value: stats.properties, icon: <Building2 size={24} />, color: 'text-blue-400' },
+          { label: 'VR Tours', value: stats.properties, icon: <Image size={24} />, color: 'text-green-400' },
+          { label: 'Messages', value: stats.messages, icon: <MessageSquare size={24} />, color: 'text-yellow-400' },
           { label: 'Page Views', value: '-', icon: <LayoutDashboard size={24} />, color: 'text-purple-400' },
         ].map((stat, i) => (
           <div key={i} className="glass-card p-6">

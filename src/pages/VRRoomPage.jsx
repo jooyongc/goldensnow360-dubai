@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, Filter, Grid3X3, Map as MapIcon, X } from 'lucide-react'
-import { supabase, DEMO_MODE, demoProperties } from '../lib/supabase'
+import { supabase, demoProperties } from '../lib/supabase'
 import DubaiMap from '../components/DubaiMap'
 import PropertyCard from '../components/PropertyCard'
 
@@ -16,7 +16,6 @@ export default function VRRoomPage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (DEMO_MODE) { setLoading(false); return }
       try {
         const { data } = await supabase
           .from('properties')

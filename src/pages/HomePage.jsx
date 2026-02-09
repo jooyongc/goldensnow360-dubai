@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Play, Building2, Globe, Headset } from 'lucide-react'
-import { supabase, DEMO_MODE, demoProperties, demoHeroContent } from '../lib/supabase'
+import { supabase, demoProperties, demoHeroContent } from '../lib/supabase'
 import DubaiMap from '../components/DubaiMap'
 import PropertyCard from '../components/PropertyCard'
 
@@ -12,17 +12,13 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchData() {
-      if (DEMO_MODE) {
-        setLoading(false)
-        return
-      }
       try {
         const [heroRes, propRes] = await Promise.all([
           supabase.from('hero_sections').select('*').eq('page', 'home').eq('is_active', true).single(),
           supabase.from('properties').select('*').order('created_at', { ascending: false })
         ])
         if (heroRes.data) setHero(heroRes.data)
-        if (propRes.data) setProperties(propRes.data)
+        if (propRes.data && propRes.data.length > 0) setProperties(propRes.data)
       } catch (e) {
         console.error(e)
       }
