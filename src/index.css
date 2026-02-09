@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dubai-dark text-white font-sans m-0;
+    min-height: 100vh;
+  }
+  #root {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+  }
+  a { text-decoration: none; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gold-500 hover:bg-gold-400 text-dubai-dark font-semibold px-6 py-3 rounded-lg transition-all duration-300;
+  }
+  .btn-secondary {
+    @apply border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-dubai-dark font-semibold px-6 py-3 rounded-lg transition-all duration-300;
+  }
+  .section-title {
+    @apply font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white;
+  }
+  .section-subtitle {
+    @apply text-gold-300 text-lg md:text-xl font-light;
+  }
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
+  }
+  .admin-input {
+    @apply w-full bg-dubai-navy border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-gold-500 transition-colors;
+  }
+  .admin-btn {
+    @apply bg-gold-500 hover:bg-gold-400 text-dubai-dark font-semibold px-6 py-2 rounded-lg transition-all;
+  }
+}
+
+.leaflet-container {
+  background: #16213e !important;
+  border-radius: 12px;
+}
+.leaflet-popup-content-wrapper {
+  background: #1a1a2e !important;
+  color: white !important;
+  border: 1px solid rgba(201, 160, 30, 0.3);
+  border-radius: 12px !important;
+}
+.leaflet-popup-tip { background: #1a1a2e !important; }
+.leaflet-popup-content { margin: 12px 16px !important; }
+
+.marker-pin {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #e8bc2a, #c9a01e);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(201, 160, 30, 0.4);
+  animation: pulse 2s infinite;
+}
+.marker-pin::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: #1a1a2e;
+  border-radius: 50%;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(201, 160, 30, 0.4); }
+  50% { box-shadow: 0 2px 16px rgba(201, 160, 30, 0.8); }
+}
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
