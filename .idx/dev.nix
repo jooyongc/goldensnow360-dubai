@@ -19,7 +19,7 @@
       enable = true;
       previews = {
         web = {
-          command = ["npx" "vite" "--host" "0.0.0.0" "--port" "$PORT"];
+          command = ["bash" "-c" "cd /home/user/goldensnow360-dubai && npm run build && npx serve dist -s -l $PORT"];
           manager = "web";
         };
       };
@@ -28,7 +28,7 @@
     workspace = {
       # Runs when a workspace is first created
       onCreate = {
-        npm-install = "npm install";
+        npm-install = "cd /home/user/goldensnow360-dubai && npm install";
         default.openFiles = [ "src/App.jsx" "src/pages/HomePage.jsx" ];
       };
       # Runs when the workspace is (re)started
