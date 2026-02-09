@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, Save, X, MapPin, ExternalLink } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X, MapPin, ExternalLink, Search, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 const emptyProperty = {
@@ -7,6 +7,86 @@ const emptyProperty = {
   lat: 25.2048, lng: 55.2708, price: '', bedrooms: 0, bathrooms: 0,
   size_sqft: 0, matterport_url: '', thumbnail: '', property_type: 'Apartment',
   status: 'available', featured: false
+}
+
+function AddressSearch({ onSelect, currentAddress }) {
+  const [query, setQuery] = useState(currentAddress || '')
+  const [searching, setSearching] = useState(false)
+  const [results, setResults] = useState([])
+
+  const handleSearch = async () => {
+    if (!query.trim()) return
+    setSearching(true)
+    setResults([])
+    try {
+      const searchQuery = query.toLowerCase().includes('dubai') ? query : `${query}, Dubai, UAE`
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&addressdetails=1`
+      )
+      const data = await res.json()
+      setResults(data)
+    } catch (e) {
+      console.error(e)
+    }
+    setSearching(false)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
+
+  return (
+    <div>
+      <label className="block text-white/60 text-sm mb-2">Address / Location *</label>
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="admin-input flex-1"
+          placeholder="e.g. Palm Jumeirah, Downtown Dubai, Marina..."
+        />
+        <button
+          type="button"
+          onClick={handleSearch}
+          disabled={searching}
+          className="admin-btn flex items-center gap-2 whitespace-nowrap"
+        >
+          {searching ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+          Search
+        </button>
+      </div>
+      {results.length > 0 && (
+        <div className="mt-2 border border-white/10 rounded-lg overflow-hidden">
+          {results.map((r, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                onSelect({
+                  lat: parseFloat(r.lat),
+                  lng: parseFloat(r.lon),
+                  location: r.display_name.split(',').slice(0, 3).join(',').trim(),
+                  area: r.address?.suburb || r.address?.city_district || r.address?.neighbourhood || r.display_name.split(',')[0].trim()
+                })
+                setQuery(r.display_name.split(',').slice(0, 3).join(',').trim())
+                setResults([])
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-white/80 hover:bg-white/10 border-b border-white/5 last:border-0 transition-colors"
+            >
+              <div className="flex items-start gap-2">
+                <MapPin size={14} className="text-gold-400 mt-0.5 flex-shrink-0" />
+                <span>{r.display_name}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function AdminProperties() {
@@ -73,7 +153,7 @@ export default function AdminProperties() {
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center overflow-y-auto py-8">
-          <div className="bg-dubai-navy border border-white/10 rounded-xl w-full max-w-3xl mx-4">
+          <div className="bg-dubai-navy border border-white/10 rounded-xl w-full max-w-2xl mx-4">
             <div className="flex items-center justify-between p-6 border-b border-white/10">
               <h2 className="text-white font-semibold text-lg">
                 {isNew ? 'Add New Property' : 'Edit Property'}
@@ -84,61 +164,25 @@ export default function AdminProperties() {
             </div>
 
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Title *</label>
-                  <input value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} className="admin-input" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Title (Arabic)</label>
-                  <input value={editing.title_ar || ''} onChange={e => setEditing({ ...editing, title_ar: e.target.value })} className="admin-input" dir="rtl" />
-                </div>
-              </div>
-
+              {/* Title */}
               <div>
-                <label className="block text-white/60 text-sm mb-2">Description</label>
-                <textarea rows={3} value={editing.description || ''} onChange={e => setEditing({ ...editing, description: e.target.value })} className="admin-input resize-none" />
+                <label className="block text-white/60 text-sm mb-2">Property Title *</label>
+                <input value={editing.title} onChange={e => setEditing({ ...editing, title: e.target.value })} className="admin-input" placeholder="e.g. Palm Jumeirah Luxury Villa" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Location</label>
-                  <input value={editing.location || ''} onChange={e => setEditing({ ...editing, location: e.target.value })} className="admin-input" placeholder="e.g., Downtown Dubai" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Area</label>
-                  <input value={editing.area || ''} onChange={e => setEditing({ ...editing, area: e.target.value })} className="admin-input" placeholder="e.g., Downtown Dubai" />
-                </div>
-              </div>
+              {/* Address Search */}
+              <AddressSearch
+                currentAddress={editing.location}
+                onSelect={({ lat, lng, location, area }) => setEditing({ ...editing, lat, lng, location, area })}
+              />
+              {editing.lat !== 25.2048 && (
+                <p className="text-green-400/70 text-xs -mt-3 flex items-center gap-1">
+                  <MapPin size={12} /> Location set: {editing.lat.toFixed(4)}, {editing.lng.toFixed(4)} — {editing.area}
+                </p>
+              )}
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Latitude</label>
-                  <input type="number" step="any" value={editing.lat} onChange={e => setEditing({ ...editing, lat: parseFloat(e.target.value) || 0 })} className="admin-input" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Longitude</label>
-                  <input type="number" step="any" value={editing.lng} onChange={e => setEditing({ ...editing, lng: parseFloat(e.target.value) || 0 })} className="admin-input" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Price</label>
-                  <input value={editing.price || ''} onChange={e => setEditing({ ...editing, price: e.target.value })} className="admin-input" placeholder="AED 1,000,000" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Size (sqft)</label>
-                  <input type="number" value={editing.size_sqft || 0} onChange={e => setEditing({ ...editing, size_sqft: parseInt(e.target.value) || 0 })} className="admin-input" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Bedrooms</label>
-                  <input type="number" value={editing.bedrooms || 0} onChange={e => setEditing({ ...editing, bedrooms: parseInt(e.target.value) || 0 })} className="admin-input" />
-                </div>
-                <div>
-                  <label className="block text-white/60 text-sm mb-2">Bathrooms</label>
-                  <input type="number" value={editing.bathrooms || 0} onChange={e => setEditing({ ...editing, bathrooms: parseInt(e.target.value) || 0 })} className="admin-input" />
-                </div>
+              {/* Type, Price - single row */}
+              <div className="grid grid-cols-2 gap-5">
                 <div>
                   <label className="block text-white/60 text-sm mb-2">Type</label>
                   <select value={editing.property_type} onChange={e => setEditing({ ...editing, property_type: e.target.value })} className="admin-input">
@@ -151,6 +195,48 @@ export default function AdminProperties() {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-white/60 text-sm mb-2">Price</label>
+                  <input value={editing.price || ''} onChange={e => setEditing({ ...editing, price: e.target.value })} className="admin-input" placeholder="AED 1,000,000" />
+                </div>
+              </div>
+
+              {/* Beds, Baths, Size - single row */}
+              <div className="grid grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-white/60 text-sm mb-2">Beds</label>
+                  <input type="number" min="0" value={editing.bedrooms || 0} onChange={e => setEditing({ ...editing, bedrooms: parseInt(e.target.value) || 0 })} className="admin-input" />
+                </div>
+                <div>
+                  <label className="block text-white/60 text-sm mb-2">Baths</label>
+                  <input type="number" min="0" value={editing.bathrooms || 0} onChange={e => setEditing({ ...editing, bathrooms: parseInt(e.target.value) || 0 })} className="admin-input" />
+                </div>
+                <div>
+                  <label className="block text-white/60 text-sm mb-2">Size (sqft)</label>
+                  <input type="number" min="0" value={editing.size_sqft || 0} onChange={e => setEditing({ ...editing, size_sqft: parseInt(e.target.value) || 0 })} className="admin-input" />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-white/60 text-sm mb-2">Description</label>
+                <textarea rows={3} value={editing.description || ''} onChange={e => setEditing({ ...editing, description: e.target.value })} className="admin-input resize-none" placeholder="Brief description of the property..." />
+              </div>
+
+              {/* Matterport URL */}
+              <div>
+                <label className="block text-white/60 text-sm mb-2">Matterport URL *</label>
+                <input value={editing.matterport_url || ''} onChange={e => setEditing({ ...editing, matterport_url: e.target.value })} className="admin-input" placeholder="https://my.matterport.com/show/?m=..." />
+              </div>
+
+              {/* Thumbnail */}
+              <div>
+                <label className="block text-white/60 text-sm mb-2">Thumbnail Image URL</label>
+                <input value={editing.thumbnail || ''} onChange={e => setEditing({ ...editing, thumbnail: e.target.value })} className="admin-input" placeholder="https://..." />
+              </div>
+
+              {/* Status & Featured */}
+              <div className="flex items-center gap-6">
+                <div>
                   <label className="block text-white/60 text-sm mb-2">Status</label>
                   <select value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value })} className="admin-input">
                     <option value="available">Available</option>
@@ -159,28 +245,14 @@ export default function AdminProperties() {
                     <option value="draft">Draft</option>
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-white/60 text-sm mb-2">Matterport URL *</label>
-                <input value={editing.matterport_url || ''} onChange={e => setEditing({ ...editing, matterport_url: e.target.value })} className="admin-input" placeholder="https://my.matterport.com/show/?m=..." />
-                <p className="text-white/30 text-xs mt-1">Paste the Matterport embed URL here. This will be displayed as the 3D tour.</p>
-              </div>
-
-              <div>
-                <label className="block text-white/60 text-sm mb-2">Thumbnail Image URL</label>
-                <input value={editing.thumbnail || ''} onChange={e => setEditing({ ...editing, thumbnail: e.target.value })} className="admin-input" placeholder="https://..." />
-              </div>
-
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer mt-5">
                   <input
                     type="checkbox"
                     checked={editing.featured || false}
                     onChange={e => setEditing({ ...editing, featured: e.target.checked })}
                     className="w-4 h-4 accent-gold-500"
                   />
-                  <span className="text-white/60 text-sm">Featured Property</span>
+                  <span className="text-white/60 text-sm">Featured</span>
                 </label>
               </div>
             </div>
