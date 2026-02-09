@@ -189,6 +189,16 @@ CREATE POLICY "Public read contact_info" ON contact_info FOR SELECT USING (is_ac
 CREATE POLICY "Public insert contact_submissions" ON contact_submissions FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public read site_settings" ON site_settings FOR SELECT USING (true);
 
+-- Admin write policies (authenticated users)
+CREATE POLICY "Admin all hero_sections" ON hero_sections FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all properties" ON properties FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all about_content" ON about_content FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all about_stats" ON about_stats FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all contact_info" ON contact_info FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all contact_submissions" ON contact_submissions FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all site_settings" ON site_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin all admin_users" ON admin_users FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- Create indexes
 CREATE INDEX IF NOT EXISTS idx_properties_area ON properties(area);
 CREATE INDEX IF NOT EXISTS idx_properties_featured ON properties(featured);

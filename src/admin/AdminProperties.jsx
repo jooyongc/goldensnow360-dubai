@@ -93,6 +93,7 @@ export default function AdminProperties() {
   const [properties, setProperties] = useState([])
   const [editing, setEditing] = useState(null)
   const [isNew, setIsNew] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
     async function fetch() {
@@ -115,17 +116,20 @@ export default function AdminProperties() {
   }
 
   const handleSave = async () => {
+    setSaveError('')
     try {
       if (isNew) {
-        const { data } = await supabase.from('properties').insert([editing]).select().single()
+        const { data, error } = await supabase.from('properties').insert([editing]).select().single()
+        if (error) { setSaveError(error.message); return }
         if (data) setProperties([data, ...properties])
       } else {
-        const { data } = await supabase.from('properties')
+        const { data, error } = await supabase.from('properties')
           .update({ ...editing, updated_at: new Date().toISOString() })
           .eq('id', editing.id).select().single()
+        if (error) { setSaveError(error.message); return }
         if (data) setProperties(properties.map(p => p.id === data.id ? data : p))
       }
-    } catch (e) { console.error(e) }
+    } catch (e) { setSaveError(e.message); return }
     setEditing(null)
   }
 
@@ -164,6 +168,11 @@ export default function AdminProperties() {
             </div>
 
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+              {saveError && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                  <p className="text-red-400 text-sm">Error: {saveError}</p>
+                </div>
+              )}
               {/* Title */}
               <div>
                 <label className="block text-white/60 text-sm mb-2">Property Title *</label>
