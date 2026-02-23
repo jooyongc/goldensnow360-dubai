@@ -51,13 +51,16 @@ export default function VRRoomPage() {
   return (
     <div className="fade-in">
       {/* Hero */}
-      <section className="relative pt-32 pb-12 bg-dubai-navy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-12 h-[2px] bg-gold-500"></div>
-            <span className="text-gold-400 text-sm font-medium tracking-widest uppercase">VR Room</span>
+      <section className="relative pt-32 pb-12 bg-surface-dark overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[150px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="inline-flex items-center gap-2 glass-panel rounded-full px-5 py-2 mb-6">
+            <span className="material-symbols-outlined text-primary text-sm">view_in_ar</span>
+            <span className="text-white/60 text-sm font-medium">VR Room</span>
           </div>
-          <h1 className="section-title mb-4">360° Virtual Tours</h1>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
+            360° Virtual <span className="text-gradient-gold">Tours</span>
+          </h1>
           <p className="section-subtitle max-w-2xl">
             Explore Dubai properties with immersive Matterport 3D virtual tours
           </p>
@@ -65,85 +68,87 @@ export default function VRRoomPage() {
       </section>
 
       {/* Search & Filters */}
-      <section className="bg-dubai-dark border-b border-white/10 sticky top-20 z-40">
+      <section className="bg-bg-dark border-b border-white/[0.04] sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search properties..."
-                className="admin-input pl-12"
-              />
-            </div>
+          <div className="glass-panel rounded-2xl p-3 sm:p-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search properties..."
+                  className="w-full bg-white/5 border border-white/[0.06] rounded-xl px-5 py-3 pl-12 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
 
-            {/* Area Filter */}
-            <select
-              value={selectedArea}
-              onChange={e => setSelectedArea(e.target.value)}
-              className="admin-input md:w-48"
-            >
-              <option value="">All Areas</option>
-              {areas.map(area => (
-                <option key={area} value={area}>{area}</option>
-              ))}
-            </select>
-
-            {/* Type Filter */}
-            <select
-              value={selectedType}
-              onChange={e => setSelectedType(e.target.value)}
-              className="admin-input md:w-48"
-            >
-              <option value="">All Types</option>
-              {types.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-
-            {/* View Toggle */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-3 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-gold-500 text-dubai-dark' : 'bg-white/10 text-white/60'
-                }`}
+              {/* Area Filter */}
+              <select
+                value={selectedArea}
+                onChange={e => setSelectedArea(e.target.value)}
+                className="bg-white/5 border border-white/[0.06] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors md:w-44"
               >
-                <Grid3X3 size={18} />
-              </button>
-              <button
-                onClick={() => setViewMode('map')}
-                className={`p-3 rounded-lg transition-colors ${
-                  viewMode === 'map' ? 'bg-gold-500 text-dubai-dark' : 'bg-white/10 text-white/60'
-                }`}
+                <option value="">All Areas</option>
+                {areas.map(area => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+
+              {/* Type Filter */}
+              <select
+                value={selectedType}
+                onChange={e => setSelectedType(e.target.value)}
+                className="bg-white/5 border border-white/[0.06] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors md:w-44"
               >
-                <MapIcon size={18} />
-              </button>
+                <option value="">All Types</option>
+                {types.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+
+              {/* View Toggle */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-3 rounded-xl transition-all ${
+                    viewMode === 'grid' ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-white/5 text-white/40 hover:text-white'
+                  }`}
+                >
+                  <Grid3X3 size={18} />
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`p-3 rounded-xl transition-all ${
+                    viewMode === 'map' ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-white/5 text-white/40 hover:text-white'
+                  }`}
+                >
+                  <MapIcon size={18} />
+                </button>
+              </div>
             </div>
           </div>
 
           {hasFilters && (
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-white/40 text-sm">Filters:</span>
+            <div className="flex items-center gap-2 mt-3 px-1">
+              <span className="text-white/30 text-sm">Filters:</span>
               {search && (
-                <span className="bg-gold-500/20 text-gold-400 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full flex items-center gap-1 border border-primary/20">
                   "{search}" <X size={12} className="cursor-pointer" onClick={() => setSearch('')} />
                 </span>
               )}
               {selectedArea && (
-                <span className="bg-gold-500/20 text-gold-400 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full flex items-center gap-1 border border-primary/20">
                   {selectedArea} <X size={12} className="cursor-pointer" onClick={() => setSelectedArea('')} />
                 </span>
               )}
               {selectedType && (
-                <span className="bg-gold-500/20 text-gold-400 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                <span className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full flex items-center gap-1 border border-primary/20">
                   {selectedType} <X size={12} className="cursor-pointer" onClick={() => setSelectedType('')} />
                 </span>
               )}
-              <button onClick={clearFilters} className="text-white/40 text-xs hover:text-white ml-2">
+              <button onClick={clearFilters} className="text-white/30 text-xs hover:text-white ml-2 transition-colors">
                 Clear all
               </button>
             </div>
@@ -152,11 +157,11 @@ export default function VRRoomPage() {
       </section>
 
       {/* Results */}
-      <section className="py-12 bg-dubai-dark">
+      <section className="py-12 bg-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
-            <p className="text-white/60">
-              <span className="text-gold-400 font-semibold">{filtered.length}</span> properties found
+            <p className="text-white/40">
+              <span className="text-primary font-semibold">{filtered.length}</span> properties found
             </p>
           </div>
 
@@ -166,9 +171,11 @@ export default function VRRoomPage() {
             <>
               {filtered.length === 0 ? (
                 <div className="text-center py-20">
-                  <Filter className="text-white/20 mx-auto mb-4" size={48} />
-                  <h3 className="text-white/60 text-xl mb-2">No properties found</h3>
-                  <p className="text-white/40">Try adjusting your filters</p>
+                  <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                    <Filter className="text-white/20" size={32} />
+                  </div>
+                  <h3 className="text-white/50 text-xl mb-2">No properties found</h3>
+                  <p className="text-white/30">Try adjusting your filters</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -31,15 +31,15 @@ export default function PropertyDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <div className="text-gold-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center pt-20 bg-bg-dark">
+        <div className="text-primary">Loading...</div>
       </div>
     )
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
+      <div className="min-h-screen flex items-center justify-center pt-20 bg-bg-dark">
         <div className="text-center">
           <h2 className="text-white text-2xl mb-4">Property not found</h2>
           <Link to="/vr-room" className="btn-primary">Back to VR Room</Link>
@@ -49,105 +49,101 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className="fade-in pt-20">
+    <div className="fade-in pt-24 bg-bg-dark min-h-screen">
       {/* Breadcrumb */}
-      <div className="bg-dubai-navy border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-3">
-            <Link to="/vr-room" className="flex items-center gap-2 text-white/60 hover:text-gold-400 transition-colors">
-              <ArrowLeft size={18} />
-              Back to VR Room
-            </Link>
-            <span className="text-white/30">/</span>
-            <span className="text-gold-400">{property.title}</span>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="glass-panel rounded-full px-5 py-3 inline-flex items-center gap-3">
+          <Link to="/vr-room" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm">
+            <ArrowLeft size={16} />
+            VR Room
+          </Link>
+          <span className="text-white/20">/</span>
+          <span className="text-primary text-sm font-medium">{property.title}</span>
         </div>
       </div>
 
       {/* Matterport 3D Viewer */}
-      <section className="bg-dubai-dark">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ paddingBottom: '56.25%' }}>
-            <iframe
-              src={property.matterport_url}
-              title={`${property.title} - 3D Virtual Tour`}
-              className="absolute inset-0 w-full h-full"
-              frameBorder="0"
-              allowFullScreen
-              allow="xr-spatial-tracking"
-            />
-          </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="relative rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/5" style={{ paddingBottom: '56.25%' }}>
+          <iframe
+            src={property.matterport_url}
+            title={`${property.title} - 3D Virtual Tour`}
+            className="absolute inset-0 w-full h-full"
+            frameBorder="0"
+            allowFullScreen
+            allow="xr-spatial-tracking"
+          />
         </div>
       </section>
 
       {/* Property Details */}
-      <section className="py-12 bg-dubai-navy">
+      <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
             {/* Main Info */}
             <div className="lg:col-span-2">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="bg-gold-500 text-dubai-dark text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="glass-panel text-white text-xs font-semibold px-4 py-1.5 rounded-full">
                       {property.property_type}
                     </span>
                     {property.featured && (
-                      <span className="bg-dubai-accent text-white text-xs font-bold px-3 py-1 rounded-full">
+                      <span className="bg-primary/80 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full">
                         Featured
                       </span>
                     )}
                   </div>
-                  <h1 className="text-white font-display text-3xl md:text-4xl font-bold mb-2">
+                  <h1 className="text-white font-bold text-3xl md:text-4xl mb-2">
                     {property.title}
                   </h1>
                   {property.title_ar && (
-                    <p className="text-white/40 text-lg font-light" dir="rtl">{property.title_ar}</p>
+                    <p className="text-white/30 text-lg font-light" dir="rtl">{property.title_ar}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-white/50 mb-6">
-                <MapPin size={18} className="text-gold-400" />
+              <div className="flex items-center gap-2 text-white/40 mb-6">
+                <MapPin size={18} className="text-primary" />
                 <span className="text-lg">{property.location}</span>
               </div>
 
-              <p className="text-gold-400 font-display text-3xl font-bold mb-8">{property.price}</p>
+              <p className="text-gradient-gold font-bold text-3xl mb-8">{property.price}</p>
 
               {/* Property Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 {property.bedrooms > 0 && (
-                  <div className="glass-card p-4 text-center">
-                    <Bed className="text-gold-400 mx-auto mb-2" size={24} />
+                  <div className="glass-panel rounded-2xl p-4 text-center">
+                    <Bed className="text-primary mx-auto mb-2" size={24} />
                     <div className="text-white font-bold text-xl">{property.bedrooms}</div>
-                    <div className="text-white/50 text-sm">Bedrooms</div>
+                    <div className="text-white/40 text-sm">Bedrooms</div>
                   </div>
                 )}
                 {property.bathrooms > 0 && (
-                  <div className="glass-card p-4 text-center">
-                    <Bath className="text-gold-400 mx-auto mb-2" size={24} />
+                  <div className="glass-panel rounded-2xl p-4 text-center">
+                    <Bath className="text-primary mx-auto mb-2" size={24} />
                     <div className="text-white font-bold text-xl">{property.bathrooms}</div>
-                    <div className="text-white/50 text-sm">Bathrooms</div>
+                    <div className="text-white/40 text-sm">Bathrooms</div>
                   </div>
                 )}
                 {property.size_sqft > 0 && (
-                  <div className="glass-card p-4 text-center">
-                    <Maximize className="text-gold-400 mx-auto mb-2" size={24} />
+                  <div className="glass-panel rounded-2xl p-4 text-center">
+                    <Maximize className="text-primary mx-auto mb-2" size={24} />
                     <div className="text-white font-bold text-xl">{property.size_sqft.toLocaleString()}</div>
-                    <div className="text-white/50 text-sm">Sq Ft</div>
+                    <div className="text-white/40 text-sm">Sq Ft</div>
                   </div>
                 )}
-                <div className="glass-card p-4 text-center">
-                  <Building2 className="text-gold-400 mx-auto mb-2" size={24} />
+                <div className="glass-panel rounded-2xl p-4 text-center">
+                  <Building2 className="text-primary mx-auto mb-2" size={24} />
                   <div className="text-white font-bold text-lg">{property.property_type}</div>
-                  <div className="text-white/50 text-sm">Type</div>
+                  <div className="text-white/40 text-sm">Type</div>
                 </div>
               </div>
 
               {/* Description */}
-              <div>
-                <h2 className="text-white font-semibold text-xl mb-4">Description</h2>
-                <p className="text-white/70 leading-relaxed whitespace-pre-line">
+              <div className="glass-panel rounded-3xl p-6 sm:p-8">
+                <h2 className="text-white font-bold text-xl mb-4">Description</h2>
+                <p className="text-white/50 leading-relaxed whitespace-pre-line">
                   {property.description}
                 </p>
               </div>
@@ -155,9 +151,9 @@ export default function PropertyDetailPage() {
 
             {/* Sidebar */}
             <div className="lg:col-span-1">
-              <div className="glass-card p-6 sticky top-28">
-                <h3 className="text-white font-semibold text-lg mb-6">Interested in this property?</h3>
-                <div className="space-y-4">
+              <div className="glass-panel rounded-3xl p-6 sticky top-28">
+                <h3 className="text-white font-bold text-lg mb-6">Interested in this property?</h3>
+                <div className="space-y-3">
                   <Link
                     to={`/contact?property=${property.id}`}
                     className="btn-primary w-full flex items-center justify-center gap-2"
@@ -177,24 +173,24 @@ export default function PropertyDetailPage() {
                   </button>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <h4 className="text-gold-400 font-semibold text-sm mb-4">PROPERTY DETAILS</h4>
+                <div className="mt-8 pt-6 border-t border-white/[0.06]">
+                  <h4 className="text-white/30 font-semibold text-xs tracking-[0.2em] uppercase mb-4">Property Details</h4>
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Area</span>
-                      <span className="text-white">{property.area}</span>
+                      <span className="text-white/40">Area</span>
+                      <span className="text-white font-medium">{property.area}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Type</span>
-                      <span className="text-white">{property.property_type}</span>
+                      <span className="text-white/40">Type</span>
+                      <span className="text-white font-medium">{property.property_type}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Status</span>
-                      <span className="text-white capitalize">{property.status}</span>
+                      <span className="text-white/40">Status</span>
+                      <span className="text-white font-medium capitalize">{property.status}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-white/50">Listed</span>
-                      <span className="text-white">
+                      <span className="text-white/40">Listed</span>
+                      <span className="text-white font-medium">
                         {property.created_at?.toDate ? property.created_at.toDate().toLocaleDateString() : new Date(property.created_at).toLocaleDateString()}
                       </span>
                     </div>

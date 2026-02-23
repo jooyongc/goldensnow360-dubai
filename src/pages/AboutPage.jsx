@@ -31,23 +31,53 @@ export default function AboutPage() {
   return (
     <div className="fade-in">
       {/* Hero */}
-      <section className="relative pt-32 pb-20 bg-dubai-navy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-12 h-[2px] bg-gold-500"></div>
-            <span className="text-gold-400 text-sm font-medium tracking-widest uppercase">About Us</span>
+      <section className="relative pt-32 pb-20 bg-surface-dark overflow-hidden">
+        {/* Glowing orb */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[150px] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="inline-flex items-center gap-2 glass-panel rounded-full px-5 py-2 mb-6">
+            <span className="material-symbols-outlined text-primary text-sm">info</span>
+            <span className="text-white/60 text-sm font-medium">About Us</span>
           </div>
-          <h1 className="section-title mb-4">{content.title}</h1>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
+            {content.title?.split(' ').slice(0, -1).join(' ')} <span className="text-gradient-gold">{content.title?.split(' ').slice(-1)}</span>
+          </h1>
           <p className="section-subtitle max-w-2xl">{content.subtitle}</p>
         </div>
       </section>
 
+      {/* Stats - overlapping */}
+      <section className="relative z-10 -mt-8 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+              {(content.stats || []).map((stat, i) => {
+                const icons = ['apartment', 'groups', 'view_in_ar', 'emoji_events']
+                return (
+                  <div key={i} className="text-center">
+                    <span className="material-symbols-outlined text-primary text-2xl mb-2 block">{icons[i] || 'check_circle'}</span>
+                    <div className="text-white font-bold text-2xl sm:text-3xl mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-white/40 text-sm">{stat.label}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Main Content */}
-      <section className="py-20 bg-dubai-dark">
+      <section className="py-20 bg-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="whitespace-pre-line text-white/70 text-lg leading-relaxed">
+              <span className="inline-flex items-center gap-2 glass-panel rounded-full px-4 py-1.5 mb-6">
+                <span className="material-symbols-outlined text-primary text-sm">history</span>
+                <span className="text-white/50 text-xs font-medium uppercase tracking-wider">Our Story</span>
+              </span>
+              <div className="whitespace-pre-line text-white/50 text-lg leading-relaxed">
                 {content.description}
               </div>
             </div>
@@ -55,73 +85,64 @@ export default function AboutPage() {
               <img
                 src={content.image}
                 alt="Golden Snow 360 Office"
-                className="w-full rounded-2xl shadow-2xl"
+                className="w-full rounded-[2rem] shadow-2xl"
               />
-              <div className="absolute -bottom-6 -left-6 w-48 h-48 bg-gold-500/10 rounded-2xl -z-10"></div>
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-gold-500/5 rounded-2xl -z-10"></div>
+              {/* Decorative circles */}
+              <div className="absolute -bottom-8 -left-8 w-40 h-40 rounded-full border border-primary/20 pointer-events-none" />
+              <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/10 blur-2xl pointer-events-none" />
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-16 bg-dubai-navy">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {(content.stats || []).map((stat, i) => (
-              <div key={i} className="text-center">
-                <div className="text-gold-400 font-display text-4xl md:text-5xl font-bold mb-2">
-                  {stat.value}
-                </div>
-                <div className="text-white/60 text-sm font-medium">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
       {/* Mission & Vision */}
-      <section className="py-20 bg-dubai-dark">
+      <section className="py-20 bg-surface-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="glass-card p-8 hover:border-gold-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gold-500/20 rounded-lg flex items-center justify-center">
-                  <Target className="text-gold-400" size={24} />
+            <div className="glass-card p-8 hover:border-primary/20 transition-all duration-300">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center">
+                  <Target className="text-primary" size={26} />
                 </div>
-                <h3 className="text-white font-display text-2xl font-bold">Our Mission</h3>
+                <h3 className="text-white font-bold text-2xl">Our Mission</h3>
               </div>
-              <p className="text-white/70 leading-relaxed">{content.mission}</p>
+              <p className="text-white/50 leading-relaxed text-lg">{content.mission}</p>
             </div>
-            <div className="glass-card p-8 hover:border-gold-500/30 transition-all">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gold-500/20 rounded-lg flex items-center justify-center">
-                  <Eye className="text-gold-400" size={24} />
+            <div className="glass-card p-8 hover:border-primary/20 transition-all duration-300">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center">
+                  <Eye className="text-primary" size={26} />
                 </div>
-                <h3 className="text-white font-display text-2xl font-bold">Our Vision</h3>
+                <h3 className="text-white font-bold text-2xl">Our Vision</h3>
               </div>
-              <p className="text-white/70 leading-relaxed">{content.vision}</p>
+              <p className="text-white/50 leading-relaxed text-lg">{content.vision}</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="py-20 bg-dubai-navy">
+      <section className="py-20 bg-bg-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="section-title mb-4">Our Values</h2>
+            <span className="inline-flex items-center gap-2 glass-panel rounded-full px-4 py-1.5 mb-4">
+              <span className="material-symbols-outlined text-primary text-sm">psychology</span>
+              <span className="text-white/50 text-xs font-medium uppercase tracking-wider">Core Values</span>
+            </span>
+            <h2 className="section-title">Our <span className="text-gradient-gold">Values</span></h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: <Award size={36} />, title: 'Excellence', desc: 'We deliver premium service and the highest quality virtual experiences for every property.' },
-              { icon: <Users size={36} />, title: 'Client First', desc: 'Every decision we make is guided by what\'s best for our clients and their property goals.' },
-              { icon: <Target size={36} />, title: 'Innovation', desc: 'We leverage cutting-edge technology to transform how people experience real estate.' },
+              { icon: <Award size={32} />, title: 'Excellence', desc: 'We deliver premium service and the highest quality virtual experiences for every property.' },
+              { icon: <Users size={32} />, title: 'Client First', desc: 'Every decision we make is guided by what\'s best for our clients and their property goals.' },
+              { icon: <Target size={32} />, title: 'Innovation', desc: 'We leverage cutting-edge technology to transform how people experience real estate.' },
             ].map((val, i) => (
-              <div key={i} className="text-center">
-                <div className="text-gold-400 mb-4 flex justify-center">{val.icon}</div>
-                <h3 className="text-white font-semibold text-xl mb-3">{val.title}</h3>
-                <p className="text-white/60">{val.desc}</p>
+              <div key={i} className="glass-card p-8 text-center hover:border-primary/20 transition-all duration-300 group">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                  <span className="text-primary">{val.icon}</span>
+                </div>
+                <h3 className="text-white font-bold text-xl mb-3">{val.title}</h3>
+                <p className="text-white/40 leading-relaxed">{val.desc}</p>
               </div>
             ))}
           </div>
@@ -129,10 +150,21 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-dubai-dark">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="section-title mb-6">Want to Work with Us?</h2>
-          <p className="text-white/60 text-lg mb-10">
+      <section className="py-24 bg-surface-dark relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/15 rounded-full blur-[150px] pointer-events-none" />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+          <span className="inline-flex items-center gap-2 glass-panel rounded-full px-5 py-2 mb-8">
+            <span className="material-symbols-outlined text-primary text-sm">handshake</span>
+            <span className="text-white/60 text-sm font-medium">Partner With Us</span>
+          </span>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+            Want to <span className="text-gradient-gold">Work with Us?</span>
+          </h2>
+          <p className="text-white/40 text-lg mb-10">
             Whether you're buying, selling, or investing in Dubai real estate, we're here to help.
           </p>
           <Link to="/contact" className="btn-primary text-lg">
