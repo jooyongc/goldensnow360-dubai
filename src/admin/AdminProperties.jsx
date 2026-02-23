@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Save, X, MapPin, ExternalLink, Search, Loader2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, serverTimestamp } from 'firebase/firestore'
 
 const emptyProperty = {
   title: '', title_ar: '', description: '', location: '', area: '',
@@ -96,13 +97,14 @@ export default function AdminProperties() {
   const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchData() {
       try {
-        const { data } = await supabase.from('properties').select('*').order('created_at', { ascending: false })
-        if (data) setProperties(data)
+        const q = query(collection(db, 'properties'), orderBy('created_at', 'desc'))
+        const snap = await getDocs(q)
+        setProperties(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       } catch (e) { console.error(e) }
     }
-    fetch()
+    fetchData()
   }, [])
 
   const handleNew = () => {
@@ -119,15 +121,18 @@ export default function AdminProperties() {
     setSaveError('')
     try {
       if (isNew) {
-        const { data, error } = await supabase.from('properties').insert([editing]).select().single()
-        if (error) { setSaveError(error.message); return }
-        if (data) setProperties([data, ...properties])
+        const { id, ...data } = editing
+        const docRef = await addDoc(collection(db, 'properties'), {
+          ...data,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp()
+        })
+        setProperties([{ id: docRef.id, ...data, created_at: new Date().toISOString() }, ...properties])
       } else {
-        const { data, error } = await supabase.from('properties')
-          .update({ ...editing, updated_at: new Date().toISOString() })
-          .eq('id', editing.id).select().single()
-        if (error) { setSaveError(error.message); return }
-        if (data) setProperties(properties.map(p => p.id === data.id ? data : p))
+        const { id, ...data } = editing
+        const docRef = doc(db, 'properties', id)
+        await updateDoc(docRef, { ...data, updated_at: serverTimestamp() })
+        setProperties(properties.map(p => p.id === id ? { ...editing } : p))
       }
     } catch (e) { setSaveError(e.message); return }
     setEditing(null)
@@ -136,7 +141,7 @@ export default function AdminProperties() {
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this property?')) return
     try {
-      await supabase.from('properties').delete().eq('id', id)
+      await deleteDoc(doc(db, 'properties', id))
       setProperties(properties.filter(p => p.id !== id))
     } catch (e) { console.error(e) }
   }

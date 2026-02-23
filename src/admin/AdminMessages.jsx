@@ -1,29 +1,35 @@
 import { useState, useEffect } from 'react'
 import { Mail, MailOpen, Trash2, Clock } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { collection, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore'
 
 export default function AdminMessages() {
   const [messages, setMessages] = useState([])
   const [selected, setSelected] = useState(null)
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchData() {
       try {
-        const { data } = await supabase
-          .from('contact_submissions')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (data) setMessages(data)
+        const q = query(collection(db, 'contact_submissions'), orderBy('created_at', 'desc'))
+        const snap = await getDocs(q)
+        setMessages(snap.docs.map(d => {
+          const data = d.data()
+          return {
+            id: d.id,
+            ...data,
+            created_at: data.created_at?.toDate?.() ? data.created_at.toDate().toISOString() : data.created_at
+          }
+        }))
       } catch (e) { console.error(e) }
     }
-    fetch()
+    fetchData()
   }, [])
 
   const markAsRead = async (msg) => {
     setSelected(msg)
     if (!msg.is_read) {
       try {
-        await supabase.from('contact_submissions').update({ is_read: true }).eq('id', msg.id)
+        await updateDoc(doc(db, 'contact_submissions', msg.id), { is_read: true })
         setMessages(messages.map(m => m.id === msg.id ? { ...m, is_read: true } : m))
       } catch (e) { console.error(e) }
     }
@@ -32,7 +38,7 @@ export default function AdminMessages() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this message?')) return
     try {
-      await supabase.from('contact_submissions').delete().eq('id', id)
+      await deleteDoc(doc(db, 'contact_submissions', id))
     } catch (e) { console.error(e) }
     setMessages(messages.filter(m => m.id !== id))
     if (selected?.id === id) setSelected(null)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Save, Plus, X, Loader2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { Save, Loader2 } from 'lucide-react'
+import { db } from '../lib/firebase'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function AdminFooter() {
   const [footer, setFooter] = useState({
@@ -21,29 +22,27 @@ export default function AdminFooter() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch footer settings
-        const { data: settings } = await supabase.from('site_settings').select('*')
-        if (settings) {
-          const map = {}
-          settings.forEach(s => { map[s.key] = s.value })
+        // Fetch footer settings (single document)
+        const settingsSnap = await getDoc(doc(db, 'site_settings', 'config'))
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data()
           setFooter({
-            description: map.footer_description || 'Premier Dubai real estate brokerage with immersive Matterport 3D virtual tours.',
-            areas: map.footer_areas || 'Palm Jumeirah, Downtown Dubai, Dubai Marina, Business Bay, JBR',
-            copyright: map.footer_copyright || 'Golden Snow 360. All rights reserved.',
-            privacy_url: map.footer_privacy_url || '',
-            terms_url: map.footer_terms_url || '',
+            description: data.footer_description || 'Premier Dubai real estate brokerage with immersive Matterport 3D virtual tours.',
+            areas: data.footer_areas || 'Palm Jumeirah, Downtown Dubai, Dubai Marina, Business Bay, JBR',
+            copyright: data.footer_copyright || 'Golden Snow 360. All rights reserved.',
+            privacy_url: data.footer_privacy_url || '',
+            terms_url: data.footer_terms_url || '',
           })
         }
 
         // Fetch contact info for footer
-        const { data: contactData } = await supabase
-          .from('contact_info').select('address, phone, email')
-          .eq('is_active', true).single()
-        if (contactData) {
+        const contactSnap = await getDoc(doc(db, 'contact_info', 'main'))
+        if (contactSnap.exists()) {
+          const data = contactSnap.data()
           setContact({
-            address: contactData.address || '',
-            phone: contactData.phone || '',
-            email: contactData.email || '',
+            address: data.address || '',
+            phone: data.phone || '',
+            email: data.email || '',
           })
         }
       } catch (e) { console.error(e) }
@@ -55,27 +54,23 @@ export default function AdminFooter() {
     setSaving(true)
     setSaved(false)
     try {
-      const entries = [
-        { key: 'footer_description', value: footer.description, type: 'text' },
-        { key: 'footer_areas', value: footer.areas, type: 'text' },
-        { key: 'footer_copyright', value: footer.copyright, type: 'text' },
-        { key: 'footer_privacy_url', value: footer.privacy_url, type: 'text' },
-        { key: 'footer_terms_url', value: footer.terms_url, type: 'text' },
-      ]
-
-      for (const entry of entries) {
-        await supabase.from('site_settings')
-          .upsert({ key: entry.key, value: entry.value, type: entry.type, updated_at: new Date().toISOString() },
-            { onConflict: 'key' })
-      }
+      // Save all footer settings as a single document
+      await setDoc(doc(db, 'site_settings', 'config'), {
+        footer_description: footer.description,
+        footer_areas: footer.areas,
+        footer_copyright: footer.copyright,
+        footer_privacy_url: footer.privacy_url,
+        footer_terms_url: footer.terms_url,
+        updated_at: serverTimestamp()
+      }, { merge: true })
 
       // Update contact info
-      const { data: existing } = await supabase.from('contact_info').select('id').eq('is_active', true).single()
-      if (existing) {
-        await supabase.from('contact_info')
-          .update({ address: contact.address, phone: contact.phone, email: contact.email, updated_at: new Date().toISOString() })
-          .eq('id', existing.id)
-      }
+      await setDoc(doc(db, 'contact_info', 'main'), {
+        address: contact.address,
+        phone: contact.phone,
+        email: contact.email,
+        updated_at: serverTimestamp()
+      }, { merge: true })
 
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)

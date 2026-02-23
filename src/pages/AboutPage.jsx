@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Target, Eye, Award, Users } from 'lucide-react'
-import { supabase, demoAboutContent } from '../lib/supabase'
+import { db, demoAboutContent } from '../lib/firebase'
+import { doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore'
 
 export default function AboutPage() {
   const [content, setContent] = useState(demoAboutContent)
@@ -10,15 +11,15 @@ export default function AboutPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [aboutRes, statsRes] = await Promise.all([
-          supabase.from('about_content').select('*').eq('is_active', true).single(),
-          supabase.from('about_stats').select('*').order('sort_order')
+        const [aboutSnap, statsSnap] = await Promise.all([
+          getDoc(doc(db, 'about_content', 'main')),
+          getDocs(query(collection(db, 'about_stats'), orderBy('sort_order')))
         ])
-        if (aboutRes.data) {
+        if (aboutSnap.exists()) {
           setContent(prev => ({
             ...prev,
-            ...aboutRes.data,
-            stats: statsRes.data || prev.stats
+            ...aboutSnap.data(),
+            stats: !statsSnap.empty ? statsSnap.docs.map(d => d.data()) : prev.stats
           }))
         }
       } catch (e) { console.error(e) }

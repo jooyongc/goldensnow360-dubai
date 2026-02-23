@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Play, Building2, Globe, Headset } from 'lucide-react'
-import { supabase, demoProperties, demoHeroContent } from '../lib/supabase'
+import { db, demoProperties, demoHeroContent } from '../lib/firebase'
+import { doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore'
 import DubaiMap from '../components/DubaiMap'
 import PropertyCard from '../components/PropertyCard'
 
@@ -13,12 +14,12 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [heroRes, propRes] = await Promise.all([
-          supabase.from('hero_sections').select('*').eq('page', 'home').eq('is_active', true).single(),
-          supabase.from('properties').select('*').order('created_at', { ascending: false })
+        const [heroSnap, propSnap] = await Promise.all([
+          getDoc(doc(db, 'hero_sections', 'home')),
+          getDocs(query(collection(db, 'properties'), orderBy('created_at', 'desc')))
         ])
-        if (heroRes.data) setHero(heroRes.data)
-        if (propRes.data && propRes.data.length > 0) setProperties(propRes.data)
+        if (heroSnap.exists()) setHero(heroSnap.data())
+        if (!propSnap.empty) setProperties(propSnap.docs.map(d => ({ id: d.id, ...d.data() })))
       } catch (e) {
         console.error(e)
       }
@@ -47,7 +48,7 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight mb-6">
-              {hero.title || 'Experience Dubai Properties in 360°'}
+              {hero.title || 'Experience Dubai Properties in 360\u00B0'}
             </h1>
             <p className="text-white/70 text-lg sm:text-xl leading-relaxed mb-10 max-w-2xl">
               {hero.description || 'Explore luxury properties across Dubai through cutting-edge Matterport 3D virtual tours.'}

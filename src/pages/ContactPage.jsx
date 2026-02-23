@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle, Instagram, Facebook, Linkedin, Youtube } from 'lucide-react'
-import { supabase, demoContactInfo } from '../lib/supabase'
+import { db, demoContactInfo } from '../lib/firebase'
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function ContactPage() {
   const [searchParams] = useSearchParams()
@@ -20,8 +21,9 @@ export default function ContactPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data } = await supabase.from('contact_info').select('*').eq('is_active', true).single()
-        if (data) {
+        const snap = await getDoc(doc(db, 'contact_info', 'main'))
+        if (snap.exists()) {
+          const data = snap.data()
           setContact({
             ...data,
             social: {
@@ -42,7 +44,11 @@ export default function ContactPage() {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await supabase.from('contact_submissions').insert([formData])
+      await addDoc(collection(db, 'contact_submissions'), {
+        ...formData,
+        is_read: false,
+        created_at: serverTimestamp()
+      })
     } catch (e) { console.error(e) }
     setSubmitted(true)
     setSubmitting(false)

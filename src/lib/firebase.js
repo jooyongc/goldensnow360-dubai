@@ -1,15 +1,25 @@
-import { createClient } from '@supabase/supabase-js'
+import { initializeApp } from 'firebase/app'
+import { getFirestore } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://huaatxezbexldcbxmvdc.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1YWF0eGV6YmV4bGRjYnhtdmRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjY0ODIsImV4cCI6MjA4NjIwMjQ4Mn0.Whyyve_1yVBEPjZUwVE8cwfpONar6LX-zUTvLUvnUqc'
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const app = initializeApp(firebaseConfig)
+export const db = getFirestore(app)
+export const auth = getAuth(app)
 
 export const demoProperties = [
   {
     id: 1,
     title: 'Palm Jumeirah Villa',
-    title_ar: 'فيلا نخلة جميرا',
+    title_ar: '\u0641\u064A\u0644\u0627 \u0646\u062E\u0644\u0629 \u062C\u0645\u064A\u0631\u0627',
     description: 'Luxury 5-bedroom villa with private beach access and stunning sea views. Experience the epitome of Dubai luxury living.',
     location: 'Palm Jumeirah',
     area: 'Palm Jumeirah',
@@ -29,7 +39,7 @@ export const demoProperties = [
   {
     id: 2,
     title: 'Downtown Dubai Penthouse',
-    title_ar: 'بنتهاوس وسط مدينة دبي',
+    title_ar: '\u0628\u0646\u062A\u0647\u0627\u0648\u0633 \u0648\u0633\u0637 \u0645\u062F\u064A\u0646\u0629 \u062F\u0628\u064A',
     description: 'Exclusive penthouse with panoramic Burj Khalifa views. Modern design with premium finishes throughout.',
     location: 'Downtown Dubai',
     area: 'Downtown Dubai',
@@ -49,7 +59,7 @@ export const demoProperties = [
   {
     id: 3,
     title: 'Dubai Marina Apartment',
-    title_ar: 'شقة دبي مارينا',
+    title_ar: '\u0634\u0642\u0629 \u062F\u0628\u064A \u0645\u0627\u0631\u064A\u0646\u0627',
     description: 'Stunning 3-bedroom apartment in the heart of Dubai Marina with marina and sea views.',
     location: 'Dubai Marina',
     area: 'Dubai Marina',
@@ -69,7 +79,7 @@ export const demoProperties = [
   {
     id: 4,
     title: 'Business Bay Office',
-    title_ar: 'مكتب خليج الأعمال',
+    title_ar: '\u0645\u0643\u062A\u0628 \u062E\u0644\u064A\u062C \u0627\u0644\u0623\u0639\u0645\u0627\u0644',
     description: 'Premium office space with canal views. Fully fitted and ready for immediate occupation.',
     location: 'Business Bay',
     area: 'Business Bay',
@@ -89,7 +99,7 @@ export const demoProperties = [
   {
     id: 5,
     title: 'JBR Beachfront Residence',
-    title_ar: 'سكن جي بي آر على الشاطئ',
+    title_ar: '\u0633\u0643\u0646 \u062C\u064A \u0628\u064A \u0622\u0631 \u0639\u0644\u0649 \u0627\u0644\u0634\u0627\u0637\u0626',
     description: 'Beachfront 2-bedroom apartment with direct beach access and stunning views of the Arabian Gulf.',
     location: 'Jumeirah Beach Residence',
     area: 'JBR',
@@ -109,7 +119,7 @@ export const demoProperties = [
 ]
 
 export const demoHeroContent = {
-  title: 'Experience Dubai Properties in 360°',
+  title: 'Experience Dubai Properties in 360\u00B0',
   subtitle: 'Immersive Virtual Reality Tours of Premium Real Estate',
   description: 'Explore luxury properties across Dubai through cutting-edge Matterport 3D virtual tours. Walk through your dream home from anywhere in the world.',
   background_image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920'

@@ -4,7 +4,9 @@ import {
   LayoutDashboard, Image, Building2, FileText, Phone, MessageSquare,
   LogOut, Menu, X, ChevronRight, Home, PanelBottom
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { auth, db } from '../lib/firebase'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { collection, getCountFromServer } from 'firebase/firestore'
 import AdminHero from './AdminHero'
 import AdminProperties from './AdminProperties'
 import AdminAbout from './AdminAbout'
@@ -20,25 +22,19 @@ export default function AdminDashboard() {
   const location = useLocation()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
         navigate('/admin')
       } else {
-        setUser(session.user)
+        setUser(user)
       }
       setLoading(false)
     })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) navigate('/admin')
-      else setUser(session.user)
-    })
-
-    return () => subscription.unsubscribe()
+    return () => unsubscribe()
   }, [navigate])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut(auth)
     navigate('/admin')
   }
 
@@ -172,13 +168,13 @@ function DashboardOverview() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const [propRes, msgRes] = await Promise.all([
-          supabase.from('properties').select('id', { count: 'exact', head: true }),
-          supabase.from('contact_submissions').select('id', { count: 'exact', head: true })
+        const [propSnap, msgSnap] = await Promise.all([
+          getCountFromServer(collection(db, 'properties')),
+          getCountFromServer(collection(db, 'contact_submissions'))
         ])
         setStats({
-          properties: propRes.count || 0,
-          messages: msgRes.count || 0
+          properties: propSnap.data().count || 0,
+          messages: msgSnap.data().count || 0
         })
       } catch (e) { console.error(e) }
     }

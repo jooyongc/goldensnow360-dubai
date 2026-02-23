@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
-import { supabase, demoAboutContent } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { demoAboutContent } from '../lib/firebase'
+import { doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore'
 
 export default function AdminAbout() {
   const [content, setContent] = useState({
@@ -16,30 +18,42 @@ export default function AdminAbout() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchData() {
       try {
-        const [aboutRes, statsRes] = await Promise.all([
-          supabase.from('about_content').select('*').eq('is_active', true).single(),
-          supabase.from('about_stats').select('*').order('sort_order')
+        const [aboutSnap, statsSnap] = await Promise.all([
+          getDoc(doc(db, 'about_content', 'main')),
+          getDocs(query(collection(db, 'about_stats'), orderBy('sort_order')))
         ])
-        if (aboutRes.data) setContent(aboutRes.data)
-        if (statsRes.data) setStats(statsRes.data)
+        if (aboutSnap.exists()) setContent(aboutSnap.data())
+        if (!statsSnap.empty) setStats(statsSnap.docs.map(d => ({ id: d.id, ...d.data() })))
       } catch (e) { console.error(e) }
     }
-    fetch()
+    fetchData()
   }, [])
 
   const handleSave = async () => {
     setSaving(true)
     try {
-      if (content.id) {
-        await supabase.from('about_content').update({
-          title: content.title, subtitle: content.subtitle, description: content.description,
-          mission: content.mission, vision: content.vision, image: content.image,
-          updated_at: new Date().toISOString()
-        }).eq('id', content.id)
-      } else {
-        await supabase.from('about_content').insert([content])
+      await setDoc(doc(db, 'about_content', 'main'), {
+        title: content.title,
+        subtitle: content.subtitle,
+        description: content.description,
+        mission: content.mission,
+        vision: content.vision,
+        image: content.image,
+        is_active: true,
+        updated_at: serverTimestamp()
+      }, { merge: true })
+
+      // Save stats
+      for (let i = 0; i < stats.length; i++) {
+        const stat = stats[i]
+        const statId = stat.id || `stat_${i}`
+        await setDoc(doc(db, 'about_stats', statId), {
+          label: stat.label,
+          value: stat.value,
+          sort_order: i,
+        }, { merge: true })
       }
     } catch (e) { console.error(e) }
     setSaving(false)

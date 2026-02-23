@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
-import { supabase, demoContactInfo } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { demoContactInfo } from '../lib/firebase'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function AdminContact() {
   const [contact, setContact] = useState({
@@ -20,25 +22,23 @@ export default function AdminContact() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchData() {
       try {
-        const { data } = await supabase.from('contact_info').select('*').eq('is_active', true).single()
-        if (data) setContact(data)
+        const snap = await getDoc(doc(db, 'contact_info', 'main'))
+        if (snap.exists()) setContact(snap.data())
       } catch (e) { console.error(e) }
     }
-    fetch()
+    fetchData()
   }, [])
 
   const handleSave = async () => {
     setSaving(true)
     try {
-      if (contact.id) {
-        await supabase.from('contact_info').update({
-          ...contact, updated_at: new Date().toISOString()
-        }).eq('id', contact.id)
-      } else {
-        await supabase.from('contact_info').insert([contact])
-      }
+      await setDoc(doc(db, 'contact_info', 'main'), {
+        ...contact,
+        is_active: true,
+        updated_at: serverTimestamp()
+      }, { merge: true })
     } catch (e) { console.error(e) }
     setSaving(false)
     setSaved(true)

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search, Filter, Grid3X3, Map as MapIcon, X } from 'lucide-react'
-import { supabase, demoProperties } from '../lib/supabase'
+import { db, demoProperties } from '../lib/firebase'
+import { collection, getDocs, query, orderBy } from 'firebase/firestore'
 import DubaiMap from '../components/DubaiMap'
 import PropertyCard from '../components/PropertyCard'
 
@@ -17,11 +18,9 @@ export default function VRRoomPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data } = await supabase
-          .from('properties')
-          .select('*')
-          .order('created_at', { ascending: false })
-        if (data) setProperties(data)
+        const q = query(collection(db, 'properties'), orderBy('created_at', 'desc'))
+        const snap = await getDocs(q)
+        if (!snap.empty) setProperties(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       } catch (e) { console.error(e) }
       setLoading(false)
     }

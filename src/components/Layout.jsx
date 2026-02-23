@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Menu, X, MapPin, Phone, Mail } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -34,29 +35,29 @@ export default function Layout() {
   useEffect(() => {
     async function fetchFooter() {
       try {
-        const [settingsRes, contactRes] = await Promise.all([
-          supabase.from('site_settings').select('*'),
-          supabase.from('contact_info').select('address, phone, email').eq('is_active', true).single()
+        const [settingsSnap, contactSnap] = await Promise.all([
+          getDoc(doc(db, 'site_settings', 'config')),
+          getDoc(doc(db, 'contact_info', 'main'))
         ])
 
-        if (settingsRes.data) {
-          const map = {}
-          settingsRes.data.forEach(s => { map[s.key] = s.value })
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data()
           setFooter(prev => ({
-            description: map.footer_description || prev.description,
-            areas: map.footer_areas ? map.footer_areas.split(',').map(a => a.trim()).filter(Boolean) : prev.areas,
-            copyright: map.footer_copyright || prev.copyright,
-            privacy_url: map.footer_privacy_url || '',
-            terms_url: map.footer_terms_url || '',
+            description: data.footer_description || prev.description,
+            areas: data.footer_areas ? data.footer_areas.split(',').map(a => a.trim()).filter(Boolean) : prev.areas,
+            copyright: data.footer_copyright || prev.copyright,
+            privacy_url: data.footer_privacy_url || '',
+            terms_url: data.footer_terms_url || '',
           }))
         }
 
-        if (contactRes.data) {
-          setContact({
-            address: contactRes.data.address || contact.address,
-            phone: contactRes.data.phone || contact.phone,
-            email: contactRes.data.email || contact.email,
-          })
+        if (contactSnap.exists()) {
+          const data = contactSnap.data()
+          setContact(prev => ({
+            address: data.address || prev.address,
+            phone: data.phone || prev.phone,
+            email: data.email || prev.email,
+          }))
         }
       } catch (e) { console.error(e) }
     }

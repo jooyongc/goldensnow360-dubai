@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Save, Image } from 'lucide-react'
-import { supabase, demoHeroContent } from '../lib/supabase'
+import { db } from '../lib/firebase'
+import { demoHeroContent } from '../lib/firebase'
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function AdminHero() {
   const [hero, setHero] = useState({
@@ -15,31 +17,29 @@ export default function AdminHero() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchData() {
       try {
-        const { data } = await supabase.from('hero_sections').select('*').eq('page', 'home').single()
-        if (data) setHero(data)
+        const snap = await getDoc(doc(db, 'hero_sections', 'home'))
+        if (snap.exists()) setHero(snap.data())
       } catch (e) { console.error(e) }
     }
-    fetch()
+    fetchData()
   }, [])
 
   const handleSave = async () => {
     setSaving(true)
     try {
-      if (hero.id) {
-        await supabase.from('hero_sections').update({
-          title: hero.title,
-          subtitle: hero.subtitle,
-          description: hero.description,
-          background_image: hero.background_image,
-          cta_text: hero.cta_text,
-          cta_link: hero.cta_link,
-          updated_at: new Date().toISOString()
-        }).eq('id', hero.id)
-      } else {
-        await supabase.from('hero_sections').insert([{ ...hero, page: 'home' }])
-      }
+      await setDoc(doc(db, 'hero_sections', 'home'), {
+        title: hero.title,
+        subtitle: hero.subtitle,
+        description: hero.description,
+        background_image: hero.background_image,
+        cta_text: hero.cta_text,
+        cta_link: hero.cta_link,
+        page: 'home',
+        is_active: true,
+        updated_at: serverTimestamp()
+      }, { merge: true })
     } catch (e) { console.error(e) }
     setSaving(false)
     setSaved(true)

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import { auth } from '../lib/firebase'
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -12,9 +13,10 @@ export default function AdminLogin() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/admin/dashboard')
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) navigate('/admin/dashboard')
     })
+    return () => unsubscribe()
   }, [navigate])
 
   const handleLogin = async (e) => {
@@ -23,18 +25,10 @@ export default function AdminLogin() {
     setLoading(true)
 
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      })
-
-      if (authError) {
-        setError(authError.message)
-      } else if (data.session) {
-        navigate('/admin/dashboard')
-      }
+      await signInWithEmailAndPassword(auth, email, password)
+      navigate('/admin/dashboard')
     } catch (e) {
-      setError('Login failed. Please try again.')
+      setError(e.message || 'Login failed. Please try again.')
     }
     setLoading(false)
   }
