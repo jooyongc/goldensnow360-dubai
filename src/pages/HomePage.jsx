@@ -107,18 +107,16 @@ export default function HomePage() {
 
       {/* Horizontal Scroll Experience Cards */}
       <section className="py-20 bg-bg-dark">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="inline-flex items-center gap-2 glass-panel rounded-full px-4 py-1.5">
-              <span className="material-symbols-outlined text-primary text-sm">explore</span>
-              <span className="text-white/50 text-xs font-medium uppercase tracking-wider">Experiences</span>
-            </span>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
+          <span className="inline-flex items-center gap-2 glass-panel rounded-full px-4 py-1.5 mb-4">
+            <span className="material-symbols-outlined text-primary text-sm">explore</span>
+            <span className="text-white/50 text-xs font-medium uppercase tracking-wider">Experiences</span>
+          </span>
           <h2 className="section-title mb-2">Discover <span className="text-gradient-gold">Dubai</span></h2>
           <p className="section-subtitle">Browse immersive property experiences</p>
         </div>
         <div className="overflow-x-auto pb-4 scrollbar-hide">
-          <div className="flex gap-6 px-4 sm:px-8 lg:px-12 min-w-max">
+          <div className="flex gap-6 px-4 sm:px-8 lg:px-12 justify-center flex-wrap lg:flex-nowrap">
             {[
               { img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=600', title: 'Downtown Dubai', count: properties.filter(p => p.area === 'Downtown Dubai').length },
               { img: 'https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=600', title: 'Palm Jumeirah', count: properties.filter(p => p.area === 'Palm Jumeirah').length },

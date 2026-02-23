@@ -84,7 +84,7 @@ export default function Layout() {
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gold-400 via-gold-500 to-gold-600 flex items-center justify-center">
                 <span className="material-symbols-outlined text-bg-dark text-lg">ac_unit</span>
               </div>
-              <span className="text-white font-bold text-sm sm:text-base tracking-tight hidden sm:block">
+              <span className="text-white font-bold text-sm tracking-tight">
                 Golden Snow <span className="text-gradient-gold">360</span>
               </span>
             </Link>
